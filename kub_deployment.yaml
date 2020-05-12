@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: $AK_SERVICE_NAME
+  labels:
+    app: $AK_SERVICE_NAME
+spec:
+  selector:
+    app: $AK_SERVICE_NAME
+    tier: ak-service
+  clusterIP: None
+
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: $AK_SERVICE_NAME
+  labels:
+    app: $AK_SERVICE_NAME
+spec:
+  selector:
+    matchLabels:
+      app: $AK_SERVICE_NAME
+      tier: ak-service
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: $AK_SERVICE_NAME
+        tier: ak-service
+    spec:
+      containers:
+      - image: $AK_IMAGE_NAME
+        name: $AK_SERVICE_NAME
+        command: ["java","-jar","ak-service-0.0.1-SNAPSHOT-jar-with-dependencies.jar"]
+        envFrom:
+        - configMapRef:
+            name: ak-service-configmap
+
+      imagePullSecrets:
+        - name: <private regestery secret>
